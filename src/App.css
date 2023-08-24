@@ -34,22 +34,22 @@
   font-size: 12px;
 }
 
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 80%;
-  margin-left: 10%;
-}
+/*table {*/
+/*  font-family: arial, sans-serif;*/
+/*  border-collapse: collapse;*/
+/*  width: 80%;*/
+/*  margin-left: 10%;*/
+/*}*/
 
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-}
+/*td, th {*/
+/*  border: 1px solid #dddddd;*/
+/*  text-align: left;*/
+/*  padding: 8px;*/
+/*}*/
 
-tr:nth-child(even) {
-  background-color: #dddddd;
-}
+/*tr:nth-child(even) {*/
+/*  background-color: #dddddd;*/
+/*}*/
 
 
 .dropdown-pagination input {
