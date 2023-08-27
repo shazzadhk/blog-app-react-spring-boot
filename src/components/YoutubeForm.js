@@ -1,19 +1,21 @@
-import {useFieldArray, useForm} from "react-hook-form";
-// import {DevTool} from "@hookform/devtools";
+import {useForm} from "react-hook-form";
 import {useEffect, useState} from "react";
 import '../App.css'
 import axios from "axios";
-import {Button, MenuItem, Stack, TextField} from "@mui/material";
+import {Alert, Button, MenuItem, Paper, Snackbar, Stack, TextField} from "@mui/material";
 
 const YoutubeForm = () => {
 
-    const [addressList,setAddressList] = useState([])
+    const [addressList, setAddressList] = useState([])
     const form = useForm()
-    const {register, handleSubmit, control} = form
+    const {register, handleSubmit, formState, reset} = form
     const baseEmpUrl = "http://localhost:8790/api/employee"
     const baseAddressUrl = "http://localhost:8790/api/address/get-all"
-    const [errorValue,setErrorValue] = useState(null)
-    // const {fields,append,remove} = useFieldArray({name: "phNumber",control})
+    const [errorValue, setErrorValue] = useState(null)
+    const {isDirty, isValid, isSubmitting, isSubmitSuccessful} = formState
+    const [alertOpen, setAlertOpen] = useState(false)
+
+    console.log({isDirty, isValid,isSubmitSuccessful})
 
     useEffect(() => {
         axios.get(baseAddressUrl).then(response => {
@@ -26,98 +28,108 @@ const YoutubeForm = () => {
         axios.post(
             baseEmpUrl, data
         ).then(response => console.log(response))
-        .catch(error => setErrorValue(error.response.data))
+            .catch(error => setErrorValue(error.response.data))
+        setAlertOpen(true)
+        handleReset()
+    }
 
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setAlertOpen(false);
+    }
+
+
+    const handleReset = () => {
+        reset()
     }
 
     return (
         <>
-            {/*<h3>Add New Employee</h3>*/}
-            {/*<form onSubmit={handleSubmit(handleOnSubmit)} noValidate>*/}
-            {/*    <label htmlFor="username">Name: </label>*/}
-            {/*    <input type="text" id="name" {...register("name")}/>*/}
-            {/*    /!*{errors.name?.message && <p className="error">{errors.name?.message}</p>}*!/*/}
-            {/*    {errorValue?.name && <p className="error">{errorValue.name}</p>}*/}
-            {/*    <br/>*/}
 
-            {/*    <label htmlFor="department">Department: </label>*/}
-            {/*    <input type="text" id="department" {...register("department")}/>*/}
-            {/*    {errorValue?.department && <p className="error">{errorValue.department}</p>}*/}
-            {/*    <br/>*/}
-            {/*    <label htmlFor="companyName">Company Name: </label>*/}
-            {/*    <input type="text" id="companyName" {...register("companyName")}/>*/}
-            {/*    {errorValue?.companyName && <p className="error">{errorValue.companyName}</p>}*/}
-            {/*    <br/>*/}
+            <Snackbar
+                open={alertOpen}
+                autoHideDuration={6000}
+                onClose={handleClose}
+                anchorOrigin={{ vertical:'top', horizontal:'right' }}>
+                <Alert onClose={handleClose} severity="success" sx={{width: '100%'}}>
+                    Employee saved is successful
+                </Alert>
+            </Snackbar>
 
-            {/*    <label htmlFor="addressIds">Address: </label>*/}
-            {/*    <select id="addressIds" {...register("addressIds")} multiple>*/}
-            {/*        <option value="">::Select One::</option>*/}
-            {/*        {*/}
-            {/*            addressList.map((address) => {*/}
-            {/*                return(*/}
-            {/*                    <option key={address.id} value={address.id}>{address.city}</option>*/}
-            {/*                    )*/}
-            {/*            })*/}
-            {/*        }*/}
-            {/*    </select>*/}
-            {/*    <br/>*/}
-
-            {/*    <div>*/}
-            {/*        <label>List of Addresses</label><br/>*/}
-            {/*        {*/}
-            {/*            fields.map((field,index) => {*/}
-            {/*                return(*/}
-            {/*                    <div className="form-control" key={field.id}>*/}
-            {/*                        <input type="text" {...register(`phNumber.${index}.number`)}/>*/}
-            {/*                        {index > 0 && <button onClick={() => remove(index)}>Remove</button>}*/}
-            {/*                    </div>*/}
-            {/*                )*/}
-            {/*            })*/}
-
-            {/*        }*/}
-            {/*        <button type="button" onClick={() => append({number:""})}>Add Address</button>*/}
-            {/*    </div>*/}
-
-            {/*    <button type="submit">Submit</button>*/}
-            {/*</form>*/}
-            {/*<DevTool control={control}/>*/}
             <form onSubmit={handleSubmit(handleOnSubmit)} noValidate>
                 <h2 style={{textAlign: 'center'}}>Add An Employee</h2>
-                <Stack spacing={2} width={500} direction="column" justifyContent="center" ml={58}>
-                    <TextField
-                        error={errorValue?.name}
-                        type="text"
-                        label="Name"
-                        helperText={errorValue?.name}
-                        {...register('name')}
-                    />
-                    <TextField
-                        error={errorValue?.department}
-                        type="text"
-                        label="Department"
-                        helperText={errorValue?.department}
-                        {...register('department')}
-                    />
-                    <TextField
-                        error={errorValue?.companyName}
-                        type="text"
-                        label="Company Name"
-                        helperText={errorValue?.companyName}
-                        {...register('companyName')}
-                    />
-                    <TextField
-                        id="outlined-select-currency"
-                        select
-                        label="Select"
-                        {...register('addressIds')}
-                    >
-                        {addressList.map((address) => (
-                            <MenuItem key={address.id} value={address.id}>
-                                {address.city}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <Button type="submit" variant="contained" color="primary">Submit</Button>
+                <Stack spacing={2} direction="column" justifyContent="flex-start" alignItems="center">
+                    <Paper style={{width: "35%"}} elevation={4}>
+                        <TextField
+                            style={{width: "100%"}}
+                            error={errorValue?.name}
+                            type="text"
+                            label="Name"
+                            helperText={errorValue?.name}
+                            {...register('name', {
+                                required: true,
+                                message: "Name can't be empty or null"
+                            })}
+                        />
+                    </Paper>
+                    <Paper style={{width: "35%"}} elevation={4}>
+                        <TextField
+                            style={{width: "100%"}}
+                            error={errorValue?.department}
+                            type="text"
+                            label="Department"
+                            helperText={errorValue?.department}
+                            {...register('department')}
+                        />
+                    </Paper>
+                    <Paper style={{width: "35%"}} elevation={4}>
+                        <TextField
+                            style={{width: "100%"}}
+                            error={errorValue?.companyName}
+                            type="text"
+                            label="Company Name"
+                            helperText={errorValue?.companyName}
+                            {...register('companyName')}
+                        />
+                    </Paper>
+                    <Paper style={{width: "35%"}} elevation={4}>
+                        <TextField
+                            style={{width: "100%"}}
+                            id="outlined-select-currency"
+                            select
+                            label="Select"
+                            {...register('addressIds')}
+                        >
+                            {addressList.map((address) => (
+                                <MenuItem key={address.id} value={address.id}>
+                                    {address.city}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Paper>
+                    <Paper style={{width: "35%"}} elevation={4}>
+                        <Button style={{width: "100%"}}
+                                disabled={!isDirty || !isValid || isSubmitting}
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                        >
+                            Submit
+                        </Button>
+                    </Paper>
+                    <Paper style={{width: "35%"}} elevation={4}>
+                        <Button style={{width: "100%"}}
+                                type="button"
+                                variant="contained"
+                                color="warning"
+                                onClick={handleReset}
+                        >
+                            Reset
+                        </Button>
+                    </Paper>
+
                 </Stack>
             </form>
 
