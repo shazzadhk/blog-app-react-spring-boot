@@ -1,14 +1,11 @@
 // import Index from "./routes";
 import {NavLink, Route, Routes} from "react-router-dom";
-// import HomePage from "./pages/HomePage";
 import MenFashion from "./pages/MenFashion";
 import ProductLayout from "./pages/ProductLayout";
 import React from "react";
-import YoutubeForm from "./components/YoutubeForm";
+import AddEmployee from "./components/AddEmployee";
 import EmployeeView from "./pages/EmployeeView";
 import './App.css'
-// import Navbar from "./components/Navbar";
-// import Footer from "./components/Footer";
 const LazyHomePage = React.lazy(() => import('./pages/HomePage'))
 
 const App = () => {
@@ -31,9 +28,6 @@ const App = () => {
                     </li>
                 </ul>
             </nav>
-            {/*<Navbar/>*/}
-            {/*<Index/>*/}
-            {/*<Footer/>*/}
             <Routes>
                 <Route path="/" element={
                     <React.Suspense fallback='...Loading'>
@@ -44,7 +38,7 @@ const App = () => {
                     <Route index element={<LazyHomePage/>}/>
                     <Route path=":id" element={<MenFashion/>}/>
                 </Route>
-                <Route path="/add-employee" element={<YoutubeForm/>}/>
+                <Route path="/add-employee" element={<AddEmployee/>}/>
                 <Route path="/view-employee" element={<EmployeeView/>}/>
             </Routes>
         </>

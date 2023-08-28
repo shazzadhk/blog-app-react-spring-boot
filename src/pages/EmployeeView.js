@@ -3,7 +3,6 @@ import axios from "axios";
 import { styled } from '@mui/material/styles';
 import {tableCellClasses} from '@mui/material/TableCell';
 import {
-    Box,
     Button,
     Paper, Stack,
     Table,
@@ -18,7 +17,6 @@ const EmployeeView = () => {
 
 
     const [employeeList,setEmployeeList] = useState([])
-    const [errorValue,setErrorValue] = useState(null)
     const [totalElements,setTotalElements] = useState(0)
     const [currentPage,setCurrentPage] = useState(0)
     const [rowsPerPage,setRowsPerPage] = useState(3)
@@ -45,19 +43,21 @@ const EmployeeView = () => {
 
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_BASE_EMP_URL}paginated?page=${currentPage}&size=${rowsPerPage}`).then(response => {
+        axios.get(`${process.env.REACT_APP_BASE_EMP_URL}/paginated?page=${currentPage}&size=${rowsPerPage}`).then(response => {
             setEmployeeList(response.data.contents)
             setTotalElements(response.data.totalElements)
         })
     }, [currentPage,rowsPerPage]);
 
-    const  handleDelEmp = async (empId) => {
+    async function handleDelEmp (empId) {
         try{
-            await axios.delete(`${process.env.REACT_APP_BASE_EMP_URL}delete/${empId}`)
-                .then(response => setErrorValue(null))
+            const response  = await axios.delete(`${process.env.REACT_APP_BASE_EMP_URL}/delete/${empId}`)
+            console.log(response)
             removeData(empId)
         }catch(error){
-            setErrorValue(error.response.data)
+            if(error.response){
+                console.log(error.response?.data)
+            }
         }
 
     }
@@ -93,9 +93,9 @@ const EmployeeView = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {employeeList.map((employee) => (
+                            {employeeList.map((employee,index) => (
                                 <StyledTableRow
-                                    key={employee.id}
+                                    key={index}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 >
                                     <StyledTableCell component="th" scope="row">
@@ -105,9 +105,9 @@ const EmployeeView = () => {
                                     <StyledTableCell align="right">{employee.department}</StyledTableCell>
                                     <StyledTableCell align="right">{employee.companyName}</StyledTableCell>
                                     <StyledTableCell align="right">{
-                                        `${employee.addressList.map(address => {
+                                        employee.addressList.map(address => {
                                             return `${address.city} `
-                                        })}`
+                                        })
                                     }</StyledTableCell>
                                     <StyledTableCell align="right">
                                         <Button variant="contained" color="error" onClick={() => handleDelEmp(employee.id)}>
@@ -129,9 +129,6 @@ const EmployeeView = () => {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Stack>
-
-
-
         </>
     )
 }

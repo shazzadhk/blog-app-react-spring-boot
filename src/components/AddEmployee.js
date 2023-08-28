@@ -2,34 +2,52 @@ import {useForm} from "react-hook-form";
 import {useEffect, useState} from "react";
 import '../App.css'
 import axios from "axios";
-import {Alert, Button, MenuItem, Paper, Snackbar, Stack, TextField} from "@mui/material";
+import {
+    Alert,
+    Button,
+    MenuItem,
+    Paper,
+    Snackbar,
+    Stack,
+    TextField
+} from "@mui/material";
+import {yupResolver} from "@hookform/resolvers/yup";
+import EmployeeValidation from "../validation/EmployeeValidation";
 
-const YoutubeForm = () => {
+const AddEmployee = () => {
 
     const [addressList, setAddressList] = useState([])
-    const form = useForm()
+    const form = useForm({resolver: yupResolver(EmployeeValidation)})
     const {register, handleSubmit, formState, reset} = form
     const [errorValue, setErrorValue] = useState(null)
-    const {isDirty, isValid, isSubmitting, isSubmitSuccessful} = formState
+    const {isDirty, isSubmitting,errors} = formState
     const [alertOpen, setAlertOpen] = useState(false)
-
-    console.log({isDirty, isValid,isSubmitSuccessful})
+    const [addressIdList,setAddressIdList] = useState([])
 
     useEffect(() => {
-        console.log(process.env)
         axios.get(`${process.env.REACT_APP_BASE_ADDRESS_URL}get-all`).then(response => {
             setAddressList(response.data)
         })
     }, []);
 
-    const handleOnSubmit = (data) => {
-        data.addressIds = [parseInt(data.addressIds)]
-        axios.post(
-            process.env.REACT_APP_BASE_EMP_URL, data
-        ).then(response => console.log(response))
-            .catch(error => setErrorValue(error.response.data))
-        setAlertOpen(true)
-        handleReset()
+
+
+    async function handleOnSubmit(data) {
+        console.log(data)
+        try {
+            data.addressIds = addressIdList
+            const response = await axios.post(`${process.env.REACT_APP_BASE_EMP_URL}`, data);
+            console.log('Response:', response.data);
+            setAlertOpen(true)
+            setAddressIdList([])
+            handleReset()
+        } catch (error) {
+            if (error.response) {
+                setErrorValue(error.response?.data)
+                console.error('Error response:', error?.response?.data);
+                console.error('Status code:', error?.response?.status);
+            }
+        }
     }
 
     const handleClose = (event, reason) => {
@@ -39,10 +57,16 @@ const YoutubeForm = () => {
         setAlertOpen(false);
     }
 
-
     const handleReset = () => {
         reset()
     }
+
+    const handleChange = (event) => {
+        const value = event.target.value
+        setAddressIdList(typeof value === 'string' ? value.split(','): value)
+    };
+
+
 
     return (
         <>
@@ -66,51 +90,65 @@ const YoutubeForm = () => {
                             error={errorValue?.name}
                             type="text"
                             label="Name"
+                            placeholder="Enter employee name"
                             helperText={errorValue?.name}
-                            {...register('name', {
-                                required: true,
-                                message: "Name can't be empty or null"
-                            })}
+                            {...register('name')}
                         />
                     </Paper>
+                    <p style={{color:'red'}}>{errors?.name?.message}</p>
                     <Paper style={{width: "35%"}} elevation={4}>
                         <TextField
                             style={{width: "100%"}}
                             error={errorValue?.department}
                             type="text"
                             label="Department"
+                            placeholder="Enter employee department"
                             helperText={errorValue?.department}
                             {...register('department')}
                         />
                     </Paper>
+                    <p style={{color:'red'}}>{errors?.name?.message}</p>
                     <Paper style={{width: "35%"}} elevation={4}>
                         <TextField
                             style={{width: "100%"}}
                             error={errorValue?.companyName}
                             type="text"
                             label="Company Name"
+                            placeholder="Enter employee company name"
                             helperText={errorValue?.companyName}
                             {...register('companyName')}
                         />
                     </Paper>
+                    <p style={{color:'red'}}>{errors?.name?.message}</p>
                     <Paper style={{width: "35%"}} elevation={4}>
                         <TextField
-                            style={{width: "100%"}}
-                            id="outlined-select-currency"
                             select
-                            label="Select"
-                            {...register('addressIds')}
+                            fullWidth
+                            type="text"
+                            label="Select Address"
+                            value={addressIdList}
+                            SelectProps={{
+                                multiple: true
+                            }}
+                            onChange={handleChange}
                         >
-                            {addressList.map((address) => (
-                                <MenuItem key={address.id} value={address.id}>
-                                    {address.city}
-                                </MenuItem>
-                            ))}
+                            {
+                                addressList.map((address) => {
+                                    return(
+                                        <MenuItem
+                                            key={address.id}
+                                            value={address.id}
+                                        >
+                                            {address.city}
+                                        </MenuItem>
+                                    )
+                                })
+                            }
                         </TextField>
                     </Paper>
                     <Paper style={{width: "35%"}} elevation={4}>
                         <Button style={{width: "100%"}}
-                                disabled={!isDirty || !isValid || isSubmitting}
+                                // disabled={!isDirty || isSubmitting}
                                 type="submit"
                                 variant="contained"
                                 color="primary"
@@ -128,11 +166,9 @@ const YoutubeForm = () => {
                             Reset
                         </Button>
                     </Paper>
-
                 </Stack>
             </form>
-
         </>
     )
 }
-export default YoutubeForm;
+export default AddEmployee;
