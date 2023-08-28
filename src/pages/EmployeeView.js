@@ -16,8 +16,7 @@ import {
 
 const EmployeeView = () => {
 
-    const baseEmpGetUrl = "http://localhost:8790/api/employee/paginated"
-    const baseEmpDelUrl = "http://localhost:8790/api/employee/delete/"
+
     const [employeeList,setEmployeeList] = useState([])
     const [errorValue,setErrorValue] = useState(null)
     const [totalElements,setTotalElements] = useState(0)
@@ -46,7 +45,7 @@ const EmployeeView = () => {
 
 
     useEffect(() => {
-        axios.get(`${baseEmpGetUrl}?page=${currentPage}&size=${rowsPerPage}`).then(response => {
+        axios.get(`${process.env.REACT_APP_BASE_EMP_URL}paginated?page=${currentPage}&size=${rowsPerPage}`).then(response => {
             setEmployeeList(response.data.contents)
             setTotalElements(response.data.totalElements)
         })
@@ -54,7 +53,7 @@ const EmployeeView = () => {
 
     const  handleDelEmp = async (empId) => {
         try{
-            await axios.delete(`${baseEmpDelUrl}${empId}`)
+            await axios.delete(`${process.env.REACT_APP_BASE_EMP_URL}delete/${empId}`)
                 .then(response => setErrorValue(null))
             removeData(empId)
         }catch(error){

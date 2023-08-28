@@ -9,8 +9,6 @@ const YoutubeForm = () => {
     const [addressList, setAddressList] = useState([])
     const form = useForm()
     const {register, handleSubmit, formState, reset} = form
-    const baseEmpUrl = "http://localhost:8790/api/employee"
-    const baseAddressUrl = "http://localhost:8790/api/address/get-all"
     const [errorValue, setErrorValue] = useState(null)
     const {isDirty, isValid, isSubmitting, isSubmitSuccessful} = formState
     const [alertOpen, setAlertOpen] = useState(false)
@@ -18,7 +16,8 @@ const YoutubeForm = () => {
     console.log({isDirty, isValid,isSubmitSuccessful})
 
     useEffect(() => {
-        axios.get(baseAddressUrl).then(response => {
+        console.log(process.env)
+        axios.get(`${process.env.REACT_APP_BASE_ADDRESS_URL}get-all`).then(response => {
             setAddressList(response.data)
         })
     }, []);
@@ -26,7 +25,7 @@ const YoutubeForm = () => {
     const handleOnSubmit = (data) => {
         data.addressIds = [parseInt(data.addressIds)]
         axios.post(
-            baseEmpUrl, data
+            process.env.REACT_APP_BASE_EMP_URL, data
         ).then(response => console.log(response))
             .catch(error => setErrorValue(error.response.data))
         setAlertOpen(true)
