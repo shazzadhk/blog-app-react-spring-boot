@@ -1,45 +1,34 @@
 // import Index from "./routes";
-import {NavLink, Route, Routes} from "react-router-dom";
-import MenFashion from "./pages/MenFashion";
-import ProductLayout from "./pages/ProductLayout";
 import React from "react";
+import './App.css'
+import {Route, Routes} from "react-router-dom";
+import MenFashion from "./pages/MenFashion";
+import ProductPage from "./pages/ProductPage";
 import AddEmployee from "./components/AddEmployee";
 import EmployeeView from "./pages/EmployeeView";
-import './App.css'
+import UpdateEmployee from "./pages/UpdateEmployee";
+import Navbar from "./components/Navbar";
 const LazyHomePage = React.lazy(() => import('./pages/HomePage'))
 
 const App = () => {
 
     return (
         <>
-            <nav>
-                <ul>
-                    <li>
-                        <NavLink to="/">Home</NavLink>
-                    </li>
-                    <li>
-                        <NavLink to="/product">Product</NavLink>
-                    </li>
-                    <li>
-                        <NavLink to="/add-employee">Add Employee</NavLink>
-                    </li>
-                    <li>
-                        <NavLink to="/view-employee">View Employee</NavLink>
-                    </li>
-                </ul>
-            </nav>
+            <Navbar/>
             <Routes>
                 <Route path="/" element={
                     <React.Suspense fallback='...Loading'>
                         <LazyHomePage/>
                     </React.Suspense>
                 }/>
-                <Route path="/product" element={<ProductLayout/>}>
+                <Route path="/product" element={<ProductPage/>}>
                     <Route index element={<LazyHomePage/>}/>
                     <Route path=":id" element={<MenFashion/>}/>
                 </Route>
                 <Route path="/add-employee" element={<AddEmployee/>}/>
                 <Route path="/view-employee" element={<EmployeeView/>}/>
+                <Route path="update-employee/:id" element={<UpdateEmployee/>}/>
+                <Route path="product-page/:category" element={<ProductPage/>}/>
             </Routes>
         </>
     )

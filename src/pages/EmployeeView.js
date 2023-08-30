@@ -12,6 +12,7 @@ import {
     TableHead, TablePagination,
     TableRow
 } from "@mui/material";
+import {Link} from "react-router-dom";
 
 const EmployeeView = () => {
 
@@ -112,6 +113,11 @@ const EmployeeView = () => {
                                     <StyledTableCell align="right">
                                         <Button variant="contained" color="error" onClick={() => handleDelEmp(employee.id)}>
                                             Delete
+                                        </Button>
+                                    </StyledTableCell>
+                                    <StyledTableCell align="right">
+                                        <Button type="button" variant="contained" color="warning">
+                                            <Link to={`/update-employee/${employee.id}`}>Edit</Link>
                                         </Button>
                                     </StyledTableCell>
                                 </StyledTableRow>

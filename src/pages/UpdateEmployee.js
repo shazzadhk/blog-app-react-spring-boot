@@ -13,34 +13,51 @@ import {
 } from "@mui/material";
 import {yupResolver} from "@hookform/resolvers/yup";
 import EmployeeValidation from "../validation/EmployeeValidation";
+import {useParams} from "react-router-dom";
 
-const AddEmployee = () => {
+const UpdateEmployee = () => {
 
-    const [addressList, setAddressList] = useState([])
+    const [allAddress, setAllAddress] = useState([])
     const form = useForm({resolver: yupResolver(EmployeeValidation)})
-    const {register, handleSubmit, formState, reset} = form
+    const {register, handleSubmit, formState} = form
     const [errorValue, setErrorValue] = useState(null)
     const {errors} = formState
     const [alertOpen, setAlertOpen] = useState(false)
     const [addressIdList,setAddressIdList] = useState([])
+    const [employee,setEmployee] = useState({})
+    const param = useParams()
+    const empId = param.id
+
+    useEffect(() => {
+        axios.get(`${process.env.REACT_APP_BASE_EMP_URL}/${empId}`)
+            .then(response => createEmployee(response.data))
+            .catch(error => console.log(error))
+    }, [empId]);
 
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_BASE_ADDRESS_URL}get-all`).then(response => {
-            setAddressList(response.data)
+            setAllAddress(response.data)
         })
     }, []);
 
+    const createEmployee = (data) => {
+        setEmployee({
+            id: data.id,
+            name: data.name,
+            department: data.department,
+            companyName: data.companyName
+        })
+       const test = data.addressList.map(address => address.id)
+         setAddressIdList(test)
+    }
 
 
     async function handleOnSubmit(data) {
-        console.log(data)
         try {
             data.addressIds = addressIdList
-            const response = await axios.post(`${process.env.REACT_APP_BASE_EMP_URL}`, data);
+            const response = await axios.put(`${process.env.REACT_APP_BASE_EMP_URL}/update/${employee.id}`, data);
             console.log('Response:', response.data);
             setAlertOpen(true)
-            setAddressIdList([])
-            handleReset()
         } catch (error) {
             if (error.response) {
                 setErrorValue(error.response?.data)
@@ -50,6 +67,11 @@ const AddEmployee = () => {
         }
     }
 
+    const handleChange = (event) => {
+        const value = event.target.value
+        setAddressIdList(typeof value === 'string' ? value.split(','): value)
+    };
+
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -57,64 +79,69 @@ const AddEmployee = () => {
         setAlertOpen(false);
     }
 
-    const handleReset = () => {
-        reset()
-    }
-
-    const handleChange = (event) => {
-        const value = event.target.value
-        setAddressIdList(typeof value === 'string' ? value.split(','): value)
-    };
-
-
-    return (
-        <>
+    return(
+        <div>
             <Snackbar
                 open={alertOpen}
                 autoHideDuration={6000}
                 onClose={handleClose}
                 anchorOrigin={{ vertical:'top', horizontal:'right' }}>
                 <Alert onClose={handleClose} severity="success" sx={{width: '100%'}}>
-                    Employee saved is successful
+                    Employee update is successful
                 </Alert>
             </Snackbar>
 
             <form onSubmit={handleSubmit(handleOnSubmit)} noValidate>
-                <h2 style={{textAlign: 'center'}}>Add An Employee</h2>
+                <h2 style={{textAlign: 'center'}}>Update An Employee</h2>
                 <Stack spacing={2} direction="column" justifyContent="flex-start" alignItems="center">
                     <Paper style={{width: "35%"}} elevation={4}>
                         <TextField
-                            style={{width: "100%"}}
+                            fullWidth
                             error={errorValue?.name}
                             type="text"
                             label="Name"
                             placeholder="Enter employee name"
+                            value={employee?.name}
                             helperText={errorValue?.name}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                             {...register('name')}
+                            onChange={(e) => setEmployee({...employee,name: e.target.value})}
                         />
                     </Paper>
                     <p style={{color:'red'}}>{errors?.name?.message}</p>
                     <Paper style={{width: "35%"}} elevation={4}>
                         <TextField
-                            style={{width: "100%"}}
+                            fullWidth
                             error={errorValue?.department}
                             type="text"
                             label="Department"
                             placeholder="Enter employee department"
+                            value={employee?.department}
                             helperText={errorValue?.department}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                             {...register('department')}
+                            onChange={(e) => setEmployee({...employee,department: e.target.value})}
                         />
                     </Paper>
                     <p style={{color:'red'}}>{errors?.name?.message}</p>
                     <Paper style={{width: "35%"}} elevation={4}>
                         <TextField
-                            style={{width: "100%"}}
+                            fullWidth
                             error={errorValue?.companyName}
                             type="text"
                             label="Company Name"
                             placeholder="Enter employee company name"
+                            value={employee?.companyName}
                             helperText={errorValue?.companyName}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                             {...register('companyName')}
+                            onChange={(e) => setEmployee({...employee,companyName: e.target.value})}
                         />
                     </Paper>
                     <p style={{color:'red'}}>{errors?.name?.message}</p>
@@ -131,7 +158,7 @@ const AddEmployee = () => {
                             onChange={handleChange}
                         >
                             {
-                                addressList.map((address) => {
+                                allAddress.map((address) => {
                                     return(
                                         <MenuItem
                                             key={address.id}
@@ -146,27 +173,16 @@ const AddEmployee = () => {
                     </Paper>
                     <Paper style={{width: "35%"}} elevation={4}>
                         <Button style={{width: "100%"}}
-                                // disabled={!isDirty || isSubmitting}
                                 type="submit"
                                 variant="contained"
-                                color="primary"
-                        >
-                            Submit
-                        </Button>
-                    </Paper>
-                    <Paper style={{width: "35%"}} elevation={4}>
-                        <Button style={{width: "100%"}}
-                                type="button"
-                                variant="contained"
                                 color="warning"
-                                onClick={handleReset}
                         >
-                            Reset
+                            Update
                         </Button>
                     </Paper>
                 </Stack>
             </form>
-        </>
+        </div>
     )
 }
-export default AddEmployee;
+export default UpdateEmployee;
